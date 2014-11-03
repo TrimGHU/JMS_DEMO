@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<beans xmlns="http://www.springframework.org/schema/beans" 
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+     xmlns:p="http://www.springframework.org/schema/p" 
+     xmlns:context="http://www.springframework.org/schema/context" 
+     xsi:schemaLocation=" 
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+http://www.springframework.org/schema/context 
+http://www.springframework.org/schema/context/spring-context-3.0.xsd"> 
+     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/> 
+     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/> 
+     
+     <context:component-scan base-package="com.hugui.springmvc.controller"/> 
+     <context:component-scan base-package="com.hugui.springmvc.service"/> 
+     
+     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
+         <property name="viewClass"><value>org.springframework.web.servlet.view.JstlView</value></property> 
+         <property name="prefix"><value>/WEB-INF/jsp/</value></property> 
+         <property name="suffix"><value>.jsp</value></property> 
+     </bean> 
+     
+   	 <!-- 配置JMS连接池 -->
+     <bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
+        destroy-method="stop">
+        <property name="connectionFactory">
+            <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+                <property name="brokerURL">
+                    <value>tcp://127.0.0.1:61616</value>
+                </property>
+            </bean>
+        </property>
+        <property name="maxConnections" value="100"></property>
+    </bean>
+    
+    <!-- 配置JMS模板 -->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory">
+            <ref local="jmsFactory" />
+        </property>
+        <property name="defaultDestinationName" value="subject" />
+        <!-- 区别它采用的模式为false是p2p为true是订阅 -->
+        <property name="pubSubDomain" value="true" />
+    </bean>
+    
+    <bean id="destination" class="org.apache.activemq.command.ActiveMQTopic">
+        <!-- 设置消息队列的名字 -->
+        <constructor-arg index="0" value="hugui_message" />
+    </bean>
+    <bean id="messageReceiver" class="com.hugui.springmvc.jms.example.JMSReceiver">
+        <property name="jmsTemplate" ref="jmsTemplate"></property>
+    </bean>
+    
+    
+    <bean id="dataSource"  
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">  
+        <property name="driverClassName"  
+           value="com.mysql.jdbc.Driver">  
+        </property>  
+        <property name="url"  
+           value="jdbc:mysql://127.0.0.1:3306/test">  
+        </property>  
+        <property name="username" value="root"></property>  
+       <property name="password" value="1234"></property>  
+   </bean>  
+    
+    
+</beans>
