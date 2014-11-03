@@ -19,7 +19,7 @@ public class PersonDisplay {
 
     @RequestMapping("/personDisplay.do") 
     public ModelMap defaultHandler() { 
-    	System.out.println("---2-----");
+    	System.out.println("---1-----");
         return new ModelMap("personList", this.dummyService.getDummyList()); 
     }
 
